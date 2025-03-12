@@ -1,0 +1,45 @@
+import numpy as np
+
+def train_kohonen(X, num_neurons=4, learning_rate=0.5, penalty_value=0.5, cnt_for_penalty=4, epochs=10):
+    print('Задание 1-2:')
+
+    win_counts = np.zeros(num_neurons, dtype=int)
+    weights = np.random.uniform(-1, 1, (num_neurons, X.shape[1]))
+
+    for epoch in range(epochs):
+        np.random.shuffle(X)
+        for x in X:
+            distances = np.linalg.norm(weights - x, axis=1)
+            penalties = np.maximum(win_counts - cnt_for_penalty, 0) * penalty_value + 1
+            distances *= penalties
+            winner = np.argmin(distances)
+            weights[winner] += learning_rate * (x - weights[winner])
+            win_counts[winner] += 1
+
+    return weights
+
+def train_hebb(X, num_neurons=2, learning_rate=0.5, epochs=10):
+    print('Задание 3:')
+
+    weights = np.random.uniform(-1, 1, (num_neurons, X.shape[1]))
+
+    for epoch in range(epochs):
+        np.random.shuffle(X)
+        for x in X:
+            y = np.tanh(np.dot(weights, x))
+            weights += learning_rate * np.outer(y, x)
+
+    return weights
+
+X = np.array([
+    [0.97, 0.2], [1.00, 0.00], [-0.72, 0.7], [-0.67, 0.74],
+    [-0.8, 0.6], [0.0, -1.0], [0.2, -0.97], [-0.3, -0.95]
+])
+
+weights_kohonen = train_kohonen(X)
+print("Веса Кохонена:")
+print(weights_kohonen)
+
+weights_hebb = train_hebb(X)
+print("Веса Хебба:")
+print(weights_hebb)
